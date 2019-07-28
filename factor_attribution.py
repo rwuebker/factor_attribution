@@ -42,12 +42,14 @@ class FactorAttribution:
                     df = pd.read_csv('{}/{}'.format(path, filename))
                     df.columns = ['ticker', 'mkt_cap', 'cur_price', 'prev_price', 'beta', 'book_value', 'sector', 'eps']
                     df.set_index('ticker', inplace=True)
+                    df.drop(['cur_price', 'prev_price'], axis=1, inplace=True)
                     totals = totals.append(df)
 
         self.info = totals
 
     def _load_prices(self):
         path = '{}/prices_{}'.format(self.prices_dir, self.date_str)
+        path = '{}/prices_2019-07-26'.format(self.prices_dir, self.date_str)
         info = self.info
         totals = pd.DataFrame()
         if os.path.exists(path):
@@ -56,7 +58,6 @@ class FactorAttribution:
                     ticker = filename.replace('.csv', '')
                     self._initialize_date_set(ticker)
                     full_file_name = '{}/{}'.format(path, filename)
-                    print('this is full_file_name: ', full_file_name)
                     df = pd.read_csv(full_file_name, index_col='Date')
                     data = {
                             "month_ago": self._get_value(ticker, df, 'month_ago', 'Adj Close'),
