@@ -9,12 +9,12 @@ from tqdm import tqdm
 
 class FactorAttribution:
 
-    def __init__(self, date_str=dt.date.today().strftime('%Y-%m-%d'), prices_dir='prices', info_dir='info', periods=1):
+    def __init__(self, analysis_date_str=dt.date.today().strftime('%Y-%m-%d'), prices_dir='prices', info_dir='info', periods=1):
         # prev date is decision date, trade date is the price we get
-        self.date_str = date_str
-        self.date = dt.datetime.strptime(date_str, '%Y-%m-%d')
-        self.analysis_date = self.date - BDay(2)
-        self.analysis_date_str = self.analysis_date.strftime('%Y-%m-%d')
+        self.analysis_date_str = analysis_date_str
+        self.analysis_date = dt.datetime.strptime(analysis_date_str, '%Y-%m-%d')
+        self.pred_date = self.analysis_date + BDay(2)
+        self.pred_date_str = self.pred_date.strftime('%Y-%m-%d')
         self.prev_date = self.analysis_date - BDay(periods)
         self.prev_date_str = self.prev_date.strftime('%Y-%m-%d')
         self.trade_date = self.analysis_date + BDay(1)
@@ -48,8 +48,8 @@ class FactorAttribution:
         self.info = totals
 
     def _load_prices(self):
-        path = '{}/prices_{}'.format(self.prices_dir, self.date_str)
-        path = '{}/prices_2019-07-26'.format(self.prices_dir, self.date_str)
+        path = '{}/prices_{}'.format(self.prices_dir, self.pred_date_str)
+        path = '{}/prices_{}'.format(self.prices_dir, '2019-07-26')
         info = self.info
         totals = pd.DataFrame()
         if os.path.exists(path):
@@ -65,7 +65,7 @@ class FactorAttribution:
                             "prev_date": self._get_value(ticker, df, 'prev_date', 'Adj Close'),
                             "analysis_date": self._get_value(ticker, df, 'analysis_date', 'Adj Close'),
                             "trade_date": self._get_value(ticker, df, 'trade_date', 'Adj Close'),
-                            "today": self._get_value(ticker, df, 'date', 'Adj Close'),
+                            "pred_date": self._get_value(ticker, df, 'pred_date', 'Adj Close'),
                             "volume": self._get_value(ticker, df, 'analysis_date', 'Volume')
                     }
                     new_df = pd.DataFrame(data, index=[ticker])
@@ -77,8 +77,8 @@ class FactorAttribution:
 
     def _initialize_date_set(self, ticker):
         date_set = {
-            'date': self.date,
-            'date_str': self.date_str,
+            'pred_date': self.pred_date,
+            'pred_date_str': self.pred_date_str,
             'prev_date': self.prev_date,
             'prev_date_str': self.prev_date_str,
             'analysis_date': self.analysis_date,
@@ -121,5 +121,5 @@ class FactorAttribution:
 
 
 if __name__ == '__main__':
-    fa = FactorAttribution(date_str='2019-07-26')
+    fa = FactorAttribution(analysis_date_str='2019-07-24')
     fa.run_attribution()
